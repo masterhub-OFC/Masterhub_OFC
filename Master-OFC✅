@@ -1,1 +1,183 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
+local masterUser = "Master hub-OFC"
+local nomeFlutuante = "MASTER HUB"
+local urlImagem = "https://i.imgur.com/ujdFqGZ.png"
+
+if player.Name ~= masterUser and player.DisplayName ~= masterUser then
+    warn("Você não tem permissão para usar o "..nomeFlutuante)
+    return
+end
+
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Tela preta para TP
+local blackScreen = Instance.new("Frame")
+blackScreen.BackgroundColor3 = Color3.new(0,0,0)
+blackScreen.Size = UDim2.new(1,0,1,0)
+blackScreen.Position = UDim2.new(0,0,0,0)
+blackScreen.Visible = false
+blackScreen.ZIndex = 1000
+blackScreen.Parent = playerGui
+
+-- Janela TP
+local tpWindow = Instance.new("Frame")
+tpWindow.Size = UDim2.new(0, 250, 0, 120)
+tpWindow.Position = UDim2.new(0.5, -125, 0.5, -60)
+tpWindow.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+tpWindow.BorderSizePixel = 0
+tpWindow.Visible = false
+tpWindow.ZIndex = 1001
+tpWindow.Parent = playerGui
+
+local tpTitle = Instance.new("TextLabel")
+tpTitle.Text = "TP"
+tpTitle.Size = UDim2.new(1, 0, 0, 30)
+tpTitle.BackgroundTransparency = 1
+tpTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
+tpTitle.Font = Enum.Font.GothamBold
+tpTitle.TextSize = 24
+tpTitle.Parent = tpWindow
+
+local tpConfirmBtn = Instance.new("TextButton")
+tpConfirmBtn.Text = "Confirmar TP"
+tpConfirmBtn.Size = UDim2.new(0.8, 0, 0, 40)
+tpConfirmBtn.Position = UDim2.new(0.1, 0, 0.5, 0)
+tpConfirmBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+tpConfirmBtn.TextColor3 = Color3.new(1,1,1)
+tpConfirmBtn.Font = Enum.Font.GothamBold
+tpConfirmBtn.TextSize = 22
+tpConfirmBtn.BorderSizePixel = 0
+tpConfirmBtn.Parent = tpWindow
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Text = "X"
+closeBtn.Size = UDim2.new(0, 25, 0, 25)
+closeBtn.Position = UDim2.new(1, -30, 0, 5)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeBtn.TextColor3 = Color3.new(1,1,1)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 20
+closeBtn.BorderSizePixel = 0
+closeBtn.Parent = tpWindow
+
+closeBtn.MouseButton1Click:Connect(function()
+    tpWindow.Visible = false
+end)
+
+-- Variável para guardar ação do teleporte atual
+local tpAction = nil
+
+tpConfirmBtn.MouseButton1Click:Connect(function()
+    if not tpAction then return end
+    tpWindow.Visible = false
+    blackScreen.Visible = true
+
+    wait(3) -- espera 3 segundos antes de teleporte
+
+    tpAction()
+
+    blackScreen.Visible = false
+end)
+
+-- Função para teleportar para base (exemplo)
+local function teleportarParaBase()
+    local character = player.Character
+    local base = workspace:FindFirstChild("Base")
+    if character and base and character:FindFirstChild("HumanoidRootPart") then
+        character.HumanoidRootPart.CFrame = base.CFrame + Vector3.new(0,5,0)
+        print("Teleportado para a base!")
+    else
+        warn("Base ou personagem não encontrados.")
+    end
+end
+
+-- Lista dos botões em ordem
+local botoes = {
+    {name = "Abrir Janela TP", action = function()
+        tpWindow.Visible = true
+        tpAction = teleportarParaBase -- aqui só um exemplo, você pode trocar a função
+    end},
+    {name = "Ativar Speed", action = function()
+        local character = player.Character
+        if character and character:FindFirstChild("Humanoid") then
+            character.Humanoid.WalkSpeed = 250
+            print("Speed ativada!")
+        end
+    end},
+    {name = "Ativar Super Pulo", action = function()
+        local character = player.Character
+        if character and character:FindFirstChild("Humanoid") then
+            character.Humanoid.JumpPower = 140 -- pulo alto para alcançar terceiro andar
+            print("Super pulo ativado!")
+        end
+    end},
+}
+
+-- Criar GUI
+local function criarFlutuante()
+    if playerGui:FindFirstChild("Flutuante") then
+        playerGui.Flutuante:Destroy()
+    end
+
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "Flutuante"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = playerGui
+
+    local frameHeight = 70 + (#botoes * 40)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 300, 0, frameHeight)
+    frame.Position = UDim2.new(0.5, -150, 0, 30)
+    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    frame.BackgroundTransparency = 0.3
+    frame.BorderSizePixel = 0
+    frame.AnchorPoint = Vector2.new(0, 0)
+    frame.Parent = screenGui
+    frame.ZIndex = 10
+
+    local image = Instance.new("ImageLabel")
+    image.Size = UDim2.new(0, 60, 0, 60)
+    image.Position = UDim2.new(0, 5, 0, 5)
+    image.BackgroundTransparency = 1
+    image.Image = urlImagem
+    image.Parent = frame
+    image.ZIndex = 11
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -70, 0, 70)
+    label.Position = UDim2.new(0, 70, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = nomeFlutuante
+    label.TextColor3 = Color3.fromRGB(0, 170, 255)
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 30
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.TextYAlignment = Enum.TextYAlignment.Center
+    label.Parent = frame
+    label.ZIndex = 11
+
+    for i, botao in ipairs(botoes) do
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(0, 280, 0, 35)
+        btn.Position = UDim2.new(0, 10, 0, 70 + (i-1)*40)
+        btn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+        btn.TextColor3 = Color3.new(1,1,1)
+        btn.Text = botao.name
+        btn.Font = Enum.Font.GothamBold
+        btn.TextSize = 20
+        btn.BorderSizePixel = 0
+        btn.AutoButtonColor = true
+        btn.Parent = frame
+        btn.ZIndex = 11
+
+        btn.MouseButton1Click:Connect(function()
+            if botao.action then
+                botao.action()
+            end
+        end)
+    end
+end
+
+criarFlutuante()
