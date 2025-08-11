@@ -1,3 +1,147 @@
+-- MASTER HUB - Script completo básico
 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+
+-- Criar GUI principal
+local gui = Instance.new("ScreenGui")
+gui.Name = "MasterHubGui"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Botão flutuante
+local button = Instance.new("ImageButton")
+button.Name = "MasterHubButton"
+button.Size = UDim2.new(0, 60, 0, 60)
+button.Position = UDim2.new(0.9, 0, 0.85, 0)
+button.BackgroundTransparency = 1
+button.Image = "rbxassetid://13874208601" -- substitua pelo ID da imagem que quiser
+button.Parent = gui
+
+-- Frame do Hub
+local hubFrame = Instance.new("Frame")
+hubFrame.Name = "HubFrame"
+hubFrame.Size = UDim2.new(0, 320, 0, 420)
+hubFrame.Position = UDim2.new(0.5, -160, 0.5, -210)
+hubFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+hubFrame.BorderSizePixel = 0
+hubFrame.Visible = false
+hubFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+hubFrame.ClipsDescendants = true
+hubFrame.Parent = gui
+hubFrame.Active = true
+hubFrame.Draggable = true
+
+-- Título
+local title = Instance.new("TextLabel")
+title.Name = "Title"
+title.Size = UDim2.new(1, 0, 0, 50)
+title.BackgroundTransparency = 1
+title.Text = "MASTER HUB"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 30
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Parent = hubFrame
+
+-- Função para criar botões
+local function createButton(text, posY)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 280, 0, 40)
+    btn.Position = UDim2.new(0, 20, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    btn.BorderSizePixel = 0
+    btn.Text = text
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 22
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Parent = hubFrame
+    return btn
+end
+
+-- Botões do Hub
+local speedBtn = createButton("Ativar Speed", 70)
+local jumpBtn = createButton("Ativar Pulo", 120)
+local tpBtn = createButton("Teleporte Disfarçado", 170)
+local closeBtn = createButton("Fechar", 370)
+
+-- Variáveis de estado
+local speedActive = false
+local jumpActive = false
+
+local originalWalkSpeed = 16
+local originalJumpPower = 50
+
+-- Função para aplicar speed
+local function setSpeed(active)
+    local char = player.Character
+    if not char then return end
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    if active then
+        humanoid.WalkSpeed = 250
+    else
+        humanoid.WalkSpeed = originalWalkSpeed
+    end
+end
+
+-- Função para aplicar pulo
+local function setJump(active)
+    local char = player.Character
+    if not char then return end
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    if active then
+        humanoid.JumpPower = 100
+    else
+        humanoid.JumpPower = originalJumpPower
+    end
+end
+
+-- Speed button click
+speedBtn.MouseButton1Click:Connect(function()
+    speedActive = not speedActive
+    setSpeed(speedActive)
+    speedBtn.Text = speedActive and "Desativar Speed" or "Ativar Speed"
+end)
+
+-- Jump button click
+jumpBtn.MouseButton1Click:Connect(function()
+    jumpActive = not jumpActive
+    setJump(jumpActive)
+    jumpBtn.Text = jumpActive and "Desativar Pulo" or "Ativar Pulo"
+end)
+
+-- Teleporte disfarçado
+tpBtn.MouseButton1Click:Connect(function()
+    local char = player.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    -- Teleporte para a posição (0,50,0) — ajuste para sua base
+    local targetPos = Vector3.new(0, 50, 0)
+    -- Usar Lerp para disfarçar teleporte
+    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), 1)
+end)
+
+-- Fechar botão
+closeBtn.MouseButton1Click:Connect(function()
+    hubFrame.Visible = false
+end)
+
+-- Mostrar/Ocultar hub ao clicar no botão flutuante
+button.MouseButton1Click:Connect(function()
+    hubFrame.Visible = not hubFrame.Visible
+end)
+
+-- Atualizar speed e jump ao respawnar
+player.CharacterAdded:Connect(function(char)
+    wait(1)
+    setSpeed(speedActive)
+    setJump(jumpActive)
+end)
 
  
